@@ -1,0 +1,32 @@
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Datasets
+Dataset/
+dataset/
+!dataset/splits.csv
+!Dataset/splits.csv
+
+# Models and checkpoints
+models/*.pth
+models/*.pt
+
+# Evaluation and output results
+results/classification/
+results/segmentation/
+results/severity/
+
+# OS / Editor specific
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
