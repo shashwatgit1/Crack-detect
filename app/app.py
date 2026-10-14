@@ -75,21 +75,49 @@ if uploaded_file is not None:
 
             st.subheader("Image-based severity")
             severity = result["severity"]
-            st.write("**Category:**", severity["severity"])
+            st.write("**Severity Category:**", f"**{severity['severity']}**")
 
-            if "crack_area_percentage" in severity:
+            if "total_crack_area_pixels" in severity or "crack_area_percentage" in severity:
+                total_area = severity.get("total_crack_area_pixels", severity.get("crack_area_pixels", 0))
+                num_cracks = severity.get("num_cracks", severity.get("connected_components", 0))
+                area_pct = severity.get("crack_area_percentage", 0.0)
+                individual_areas = severity.get("individual_crack_areas", [])
+                total_surface = severity.get("total_surface_pixels", 1)
+
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    st.metric(
+                        "Total Crack Area",
+                        f"{total_area:,} px",
+                        f"{area_pct:.2f}% of surface"
+                    )
+                with col_b:
+                    st.metric(
+                        "Detected Cracks",
+                        f"{num_cracks}",
+                        "distinct components"
+                    )
+
                 st.write(
-                    "**Predicted crack area:**",
-                    f"{severity['crack_area_percentage']}% of the mask"
+                    "**Estimated Total Length:**",
+                    f"{severity.get('estimated_length_pixels', 0):,} pixels"
                 )
-                st.write(
-                    "**Estimated length:**",
-                    f"{severity['estimated_length_pixels']} pixels"
-                )
-                st.write(
-                    "**Connected components:**",
-                    severity["connected_components"]
-                )
+
+                # When multiple cracks are present, explain the summation and show breakdown
+                if num_cracks > 1:
+                    st.info(
+                        f"📏 **Multiple cracks detected ({num_cracks} separate cracks):** "
+                        f"The total area (**{total_area:,} pixels**) is calculated by summing the individual areas of all {num_cracks} cracks."
+                    )
+                    with st.expander(f"View individual area breakdown for all {num_cracks} cracks"):
+                        for idx, area in enumerate(individual_areas, start=1):
+                            pct = (area / max(total_surface, 1)) * 100
+                            st.write(f"- **Crack #{idx}:** {area:,} pixels ({pct:.3f}% of surface)")
+                        st.markdown(f"**➡️ Total Area Sum:** **{total_area:,} pixels** ({area_pct:.2f}%)")
+                elif num_cracks == 1:
+                    st.write(f"**Single crack detected:** Area = **{total_area:,} pixels** ({area_pct:.2f}% of surface)")
+                else:
+                    st.write("**Total crack area:** 0 pixels (no cracks detected)")
 
             st.caption(severity["note"])
 

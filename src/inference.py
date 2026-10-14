@@ -137,6 +137,20 @@ def analyze_image(image):
         )
         result["mask"] = mask
         result["overlay"] = create_overlay(image, mask)
+    elif result["label"] == "Non-cracked":
+        result["severity"] = {
+            "severity": "No crack detected",
+            "total_crack_area_pixels": 0,
+            "crack_area_pixels": 0,
+            "num_cracks": 0,
+            "connected_components": 0,
+            "crack_area_percentage": 0.0,
+            "estimated_length_pixels": 0,
+            "individual_crack_areas": [],
+            "note": "Surface was classified as non-cracked. No cracks detected."
+        }
+        result["mask"] = None
+        result["overlay"] = image.convert("RGB")
     else:
         result["severity"] = {
             "severity": "Unavailable",
